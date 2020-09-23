@@ -60,6 +60,8 @@ namespace AuthenticationNetCore.Api.Services.AuthService
             CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
+            // TODO: Ne pas enregistrer tant que l'utilisateur n'a pas confirmé son adresse email
+            // TODO: Remplacer "asteur.florian@gmail.com" par user.Email quand ça sera au point
             await _emailSender.SendEmailAsync("asteur.florian@gmail.com", "Confim email", $"Hi {user.Name} {user.FirstName} please, confirm your email");
             await _authRepo.AddAsync(user);
             await _authRepo.SaveChangesAsync();

@@ -5,10 +5,12 @@ using AuthenticationNetCore.Api.Models;
 using AuthenticationNetCore.Api.Models.UserDto;
 using AuthenticationNetCore.Api.Services.AuthService;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthenticationNetCore.Api.Controllers
 {
+    [AllowAnonymous]
     [ApiController]
     public class AuthController : ControllerBase
     {
@@ -24,6 +26,10 @@ namespace AuthenticationNetCore.Api.Controllers
         [HttpPost("Register")]
         public async Task<ActionResult> Register(UserRegisterDto request)
         {
+            if (!request.EmailIsValid)
+            {
+                return BadRequest("Invalid email");
+            }
             ServiceResponse<Guid> response = await _authService.Register(
                 _mapper.Map<User>(request), request.Password
             );

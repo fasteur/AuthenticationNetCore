@@ -26,6 +26,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using AuthenticationNetCore.Api.Services.EmailSenderService;
 using AuthenticationNetCore.Api.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Authorization;
+
 namespace AuthenticationNetCore.Api
 {
     public class Startup
@@ -40,6 +42,7 @@ namespace AuthenticationNetCore.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllersWithViews(o => o.Filters.Add(new AuthorizeFilter()));
             services.AddDbContext<DataContext>(x => x
                 .UseLoggerFactory(LoggerFactory.Create(b => b.AddConsole()))
                 .UseSqlServer(Configuration["Auth:ConnectionStrings"])
