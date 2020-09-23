@@ -20,10 +20,12 @@ using System.Text;
 using AuthenticationNetCore.Api.Services.UserService;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using AuthenticationNetCore.Api.Entities.Role;
 using Microsoft.AspNetCore.Http;
 using AutoMapper;
-
+using Microsoft.AspNetCore.Identity.UI.Services;
+using AuthenticationNetCore.Api.Services.EmailSenderService;
+using AuthenticationNetCore.Api.Models;
+using Microsoft.AspNetCore.Identity;
 namespace AuthenticationNetCore.Api
 {
     public class Startup
@@ -86,6 +88,12 @@ namespace AuthenticationNetCore.Api
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+
+            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddEntityFrameworkStores<DataContext>();
+                
+            services.AddTransient<IEmailSender, EmailSender>();
+            services.Configure<AuthMessageSenderOptions>(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

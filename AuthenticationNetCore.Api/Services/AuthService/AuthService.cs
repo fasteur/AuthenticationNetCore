@@ -8,6 +8,8 @@ using AuthenticationNetCore.Api.Data;
 using AuthenticationNetCore.Api.Models;
 using AuthenticationNetCore.Api.Models.UserDto;
 using AuthenticationNetCore.Api.Repositories;
+using AuthenticationNetCore.Api.Services.EmailSenderService;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
@@ -17,11 +19,13 @@ namespace AuthenticationNetCore.Api.Services.AuthService
     {
         private IAuthRepository _authRepo;
         private readonly IConfiguration _config;
+        private IEmailSender _emailSender;
 
-        public AuthService(IAuthRepository authRepository, IConfiguration configuration)
+        public AuthService(IAuthRepository authRepository, IConfiguration configuration, IEmailSender emailSender)
         {
             _authRepo = authRepository;
             _config = configuration;
+            _emailSender = emailSender;
         }
         public async Task<ServiceResponse<string>> Login(string username, string password)
         {
@@ -56,7 +60,7 @@ namespace AuthenticationNetCore.Api.Services.AuthService
             CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
-
+            await _emailSender.SendEmailAsync("asteur.florian@gmail.com", "Confim email", $"Hi {user.Name} {user.FirstName} please, confirm your email");
             await _authRepo.AddAsync(user);
             await _authRepo.SaveChangesAsync();
             response.Data = user.Id;

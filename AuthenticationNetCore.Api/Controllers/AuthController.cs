@@ -3,9 +3,8 @@ using System.Threading.Tasks;
 using AuthenticationNetCore.Api.Data;
 using AuthenticationNetCore.Api.Models;
 using AuthenticationNetCore.Api.Models.UserDto;
-using AuthenticationNetCore.Api.Repositories;
 using AuthenticationNetCore.Api.Services.AuthService;
-using Microsoft.AspNetCore.Authorization;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthenticationNetCore.Api.Controllers
@@ -14,23 +13,19 @@ namespace AuthenticationNetCore.Api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private IMapper _mapper;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, IMapper mapper)
         {
             _authService = authService;
+            _mapper = mapper;
         }
 
         [HttpPost("Register")]
         public async Task<ActionResult> Register(UserRegisterDto request)
         {
             ServiceResponse<Guid> response = await _authService.Register(
-                new User { 
-                    Name = request.Name,
-                    FirstName = request.FirstName,
-                    UserName = request.UserName,
-                    Email = request.Email,
-                    Role = request.Role
-                }, request.Password
+                _mapper.Map<User>(request), request.Password
             );
             if (!response.Success)
             {

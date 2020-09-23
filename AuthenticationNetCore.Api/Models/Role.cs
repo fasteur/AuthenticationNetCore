@@ -1,4 +1,4 @@
-namespace AuthenticationNetCore.Api.Entities.Role
+namespace AuthenticationNetCore.Api.Models.Role
 {
     public static class Role
     {

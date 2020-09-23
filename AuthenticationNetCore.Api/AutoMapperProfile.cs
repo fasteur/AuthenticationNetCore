@@ -10,6 +10,7 @@ namespace AuthenticationNetCore.Api
         public AutoMapperProfile()
         {
             CreateMap<User, UserProfileDto>();
+            CreateMap<UserRegisterDto, User>();
         }
     }
 }
