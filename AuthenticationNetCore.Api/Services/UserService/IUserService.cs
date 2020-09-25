@@ -8,5 +8,6 @@ namespace AuthenticationNetCore.Api.Services.UserService
     public interface IUserService
     {
         Task<ServiceResponse<UserProfileDto>> GetProfileById (Guid id);
+        Task<ServiceResWithoutData> DeleteProfileById(Guid id);
     }
 }

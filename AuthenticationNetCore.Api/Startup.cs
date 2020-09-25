@@ -25,7 +25,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using AuthenticationNetCore.Api.Services.EmailSenderService;
 using AuthenticationNetCore.Api.Models;
-using Microsoft.AspNetCore.Identity;
+
 namespace AuthenticationNetCore.Api
 {
     public class Startup
@@ -89,9 +89,6 @@ namespace AuthenticationNetCore.Api
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
 
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<DataContext>();
-                
             services.AddTransient<IEmailSender, EmailSender>();
             services.Configure<AuthMessageSenderOptions>(Configuration);
         }

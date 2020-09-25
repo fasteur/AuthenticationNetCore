@@ -40,5 +40,21 @@ namespace AuthenticationNetCore.Api.Services.UserService
             }
             return response;
         }
+
+        public async Task<ServiceResWithoutData> DeleteProfileById(Guid id)
+        {
+            ServiceResWithoutData res = new ServiceResWithoutData();
+            try
+            {
+                await _userRepo.RemoveProfile(id);
+            }
+            catch (Exception ex)
+            {
+                res.Success = false;
+                res.Message = ex.Message;
+            }
+            return res;
+        }
+        
     }
 }

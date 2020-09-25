@@ -1,15 +1,14 @@
 using System;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using AuthenticationNetCore.Api.Models;
 using AuthenticationNetCore.Api.Models.UserDto;
-using AuthenticationNetCore.Api.Repositories;
 using AuthenticationNetCore.Api.Services.UserService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthenticationNetCore.Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class UserController : ControllerBase
@@ -32,6 +31,17 @@ namespace AuthenticationNetCore.Api.Controllers
             }
             return Ok(await _userService.GetProfileById(id));   
         }
-
+        
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProfile(Guid id)
+        {
+            ServiceResWithoutData response = await _userService.DeleteProfileById(id);
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
     }
 }

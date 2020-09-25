@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using AuthenticationNetCore.Api.Data;
-using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using System;

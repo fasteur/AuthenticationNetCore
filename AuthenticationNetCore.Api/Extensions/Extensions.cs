@@ -1,7 +1,5 @@
 using System;
 using System.Security.Claims;
-using System.Security.Principal;
-using System.Linq;
 namespace AuthenticationNetCore.Api
 {
     public static class Extensions
@@ -9,6 +7,10 @@ namespace AuthenticationNetCore.Api
         public static Guid GetUserId(this ClaimsPrincipal user)
         {
             return Guid.Parse(user.FindFirst(ClaimTypes.NameIdentifier).Value);
+        }
+        public static Guid GetConfirmCode(this ClaimsPrincipal user)
+        {
+            return Guid.Parse(user.FindFirst(ClaimTypes.AuthenticationMethod).Value);
         }
     }
 }

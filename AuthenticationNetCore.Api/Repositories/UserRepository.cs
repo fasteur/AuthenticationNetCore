@@ -21,5 +21,12 @@ namespace AuthenticationNetCore.Api.Repositories
         {
             return await context.Users.FirstOrDefaultAsync(u => u.Id == id && id == _httpContext.HttpContext.User.GetUserId());
         }
+
+        public async Task RemoveProfile(Guid id)
+        {
+            var entity = await context.Users.FindAsync(id);
+            context.Remove(entity);
+            await context.SaveChangesAsync();
+        }
     }
 }

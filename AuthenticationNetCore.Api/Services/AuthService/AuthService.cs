@@ -1,17 +1,14 @@
 using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using AuthenticationNetCore.Api.Data;
 using AuthenticationNetCore.Api.Models;
-using AuthenticationNetCore.Api.Models.UserDto;
 using AuthenticationNetCore.Api.Repositories;
-using AuthenticationNetCore.Api.Services.EmailSenderService;
+using AuthenticationNetCore.Api.Utilities.EmailTools;
+using AuthenticationNetCore.Api.Utilities.HashFunctionTools;
+using AuthenticationNetCore.Api.Utilities.TokenTools;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 
 namespace AuthenticationNetCore.Api.Services.AuthService
 {
@@ -20,30 +17,35 @@ namespace AuthenticationNetCore.Api.Services.AuthService
         private IAuthRepository _authRepo;
         private readonly IConfiguration _config;
         private IEmailSender _emailSender;
-
-        public AuthService(IAuthRepository authRepository, IConfiguration configuration, IEmailSender emailSender)
+        private readonly IHttpContextAccessor _httpContext;
+        public AuthService(
+            IAuthRepository authRepository,
+            IConfiguration configuration,
+            IEmailSender emailSender,
+            IHttpContextAccessor httpContextAccessor)
         {
             _authRepo = authRepository;
             _config = configuration;
             _emailSender = emailSender;
+            _httpContext = httpContextAccessor;
         }
         public async Task<ServiceResponse<string>> Login(string username, string password)
         {
             ServiceResponse<string> response = new ServiceResponse<string>();
-            User user = await _authRepo.FindOneAsync(u => u.UserName.ToLower().Equals(username.ToLower()));
+            User user = await _authRepo.FindOneAsync(u => u.UserName.ToLower().Equals(username.ToLower()) && u.EmaiIsValid);
             if (user == null)
             {
                 response.Success = false;
                 response.Message = "User not found.";
             }
-            else if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
+            else if (!HashUtilities.VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
             {
-                response.Success = false; 
+                response.Success = false;
                 response.Message = "Wrong password.";
             }
-            else 
+            else
             {
-                response.Data = CreateToken(user);
+                response.Data = TokenUtilities.CreateToken(_config, user);
             }
             return response;
         }
@@ -51,82 +53,66 @@ namespace AuthenticationNetCore.Api.Services.AuthService
         public async Task<ServiceResponse<Guid>> Register(User user, string password)
         {
             ServiceResponse<Guid> response = new ServiceResponse<Guid>();
-            if(await UserExists(user))
+            if (await UserExists(user))
             {
                 response.Success = false;
                 response.Message = "UserName or Email already exists.";
                 return response;
-            }
-            CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
+            };
+            HashUtilities.CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
-            await _emailSender.SendEmailAsync("asteur.florian@gmail.com", "Confim email", $"Hi {user.Name} {user.FirstName} please, confirm your email");
+
+            var emailCode = Guid.NewGuid();
+            HashUtilities.CreatePasswordHash(emailCode.ToString(), out byte[] emailCodeHash, out byte[] emailCodeSalt);
+            user.EmailCodeHash = emailCodeHash;
+            user.EmailCodeSalt = emailCodeSalt;
+
             await _authRepo.AddAsync(user);
             await _authRepo.SaveChangesAsync();
             response.Data = user.Id;
-
+            await _emailSender.SendEmailAsync("asteur.florian@gmail.com", "Confim email", EmailUtilities.EmailContentMessage(_config, user, emailCode));
             return response;
         }
-
         public async Task<bool> UserExists(User user)
         {
             return (await _authRepo.AnyAsync(u => u.UserName.ToLower() == user.UserName || u.Email == user.Email)) ? true : false;
         }
 
-        // PRIVATE METHODS
-
-        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        public async Task<ServiceResWithoutData> ConfirmEmail(Guid id)
         {
-            using(var hmac = new System.Security.Cryptography.HMACSHA512())
+            var res = new ServiceResWithoutData();
+            try
             {
-                passwordSalt = hmac.Key;
-                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-            }
-        }
-
-        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
-        {
-            using (var hmac = new System.Security.Cryptography.HMACSHA512(passwordSalt))
-            {
-                var ComputeHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                var claimPrincipal = _httpContext.HttpContext.User;
+                var claimUserId = claimPrincipal.GetUserId();
+                var claimCode = claimPrincipal.GetConfirmCode().ToString();
+                var user = await _authRepo.FindOneAsync(u => u.Id == id && claimUserId == id);
+                if (user == null || !HashUtilities.VerifyPasswordHash(claimCode, user.EmailCodeHash, user.EmailCodeSalt))
                 {
-                    for (int i = 0; i < ComputeHash.Length; i++)
-                    {
-                        if (ComputeHash[i] != passwordHash[i])
-                        {
-                            return false;
-                        }
-                    }
-                    return true;
+                    res.Success = false;
+                    res.Message = "Email address is not confirmed!";
+                }
+                else if(user.EmaiIsValid)
+                {
+                    res.Success = false;
+                    res.Message = "Email is aldready confirmed!";
+                }
+                else
+                {
+                    user.EmaiIsValid = true;
+                    await _authRepo.SaveChangesAsync();
+                    res.Success = true;
+                    res.Message = "Email address is confirmed!";
                 }
             }
-        }
-
-        private string CreateToken(User user)
-        {
-            List<Claim> claims = new List<Claim>
+            catch (Exception ex)
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Name),
-                new Claim(ClaimTypes.Role, user.Role)
-            };
+                res.Success = false; 
+                res.Message = ex.Message;
+            }
 
-            SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Auth:Token"]));
-
-            SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
-
-            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddMinutes(15),
-                SigningCredentials = creds
-            };
-
-            JwtSecurityTokenHandler  tokenHandler = new JwtSecurityTokenHandler();
-            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
-
-            return tokenHandler.WriteToken(token);
+            return res;
         }
-
     }
 }
