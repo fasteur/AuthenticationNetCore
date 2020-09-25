@@ -26,10 +26,6 @@ namespace AuthenticationNetCore.Api.Controllers
         [HttpPost("Register")]
         public async Task<ActionResult> Register(UserRegisterDto request)
         {
-            if (!request.EmailIsValid)
-            {
-                return BadRequest("Invalid email");
-            }
             ServiceResponse<Guid> response = await _authService.Register(
                 _mapper.Map<User>(request), request.Password
             );
@@ -44,6 +40,17 @@ namespace AuthenticationNetCore.Api.Controllers
         public async Task<ActionResult> Login(UserLoginDto request)
         {
             ServiceResponse<string> response = await _authService.Login(request.UserName, request.Password);
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+
+        [HttpPost("Confirm/{id}")]
+        public async Task<ActionResult> Confirm(Guid id)
+        {
+            ServiceResWithoutData response = await _authService.ConfirmEmail(id);
             if (!response.Success)
             {
                 return BadRequest(response);

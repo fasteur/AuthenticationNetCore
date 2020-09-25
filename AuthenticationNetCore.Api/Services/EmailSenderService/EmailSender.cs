@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using AuthenticationNetCore.Api.Models;
 using Microsoft.AspNetCore.Identity.UI.Services;

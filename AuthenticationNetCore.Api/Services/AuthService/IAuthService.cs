@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using AuthenticationNetCore.Api.Data;
 using AuthenticationNetCore.Api.Models;
-using AuthenticationNetCore.Api.Models.UserDto;
 
 namespace AuthenticationNetCore.Api.Services.AuthService
 {
@@ -10,6 +9,7 @@ namespace AuthenticationNetCore.Api.Services.AuthService
     {
         Task<ServiceResponse<Guid>> Register(User user, string password);
         Task<ServiceResponse<string>> Login(string username, string password);
+        Task<ServiceResWithoutData> ConfirmEmail(Guid id);
         Task<bool> UserExists(User user);
     }
 }
