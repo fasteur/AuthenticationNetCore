@@ -70,7 +70,7 @@ namespace AuthenticationNetCore.Api.Repositories
                 .ToList();
         }
 
-        public async virtual Task<List<T>> Remove(Guid id)
+        public async virtual Task<List<T>> RemoveAsyncById(Guid id)
         {
             var entity = await context.FindAsync<T>(id);
             context.Remove(entity);

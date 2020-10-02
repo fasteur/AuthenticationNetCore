@@ -19,6 +19,6 @@ namespace AuthenticationNetCore.Api.Repositories
         void SaveChanges();
         Task<int> SaveChangesAsync();
         List<T> Remove(T entity);
-        Task<List<T>> Remove(Guid id);
+        Task<List<T>> RemoveAsyncById(Guid id);
     }
 }

@@ -12,5 +12,6 @@ namespace AuthenticationNetCore.Api.Services.Teachers.TeacherService
         Task<List<GetClasseDto>> CreateClasse(AddClasseDto name);
         Task<List<GetClasseDto>> GetClasses(Guid id);
         Task<ServiceResWithoutData> AddStudent(AddStudentDto studentDto);
+        Task<ServiceResWithoutData> RemoveClasse(DeleteClasseDto deleteClasseDto);
     }
 }

@@ -46,7 +46,19 @@ namespace AuthenticationNetCore.Api.Controllers
                 return BadRequest(response);
             }
             return Ok(response);
-    
+
+        }
+
+        [Authorize(Roles = "Teacher")]
+        [HttpDelete("Classes")]
+        public async Task<IActionResult> DeleteClasse(DeleteClasseDto deleteClasseDto)
+        {
+            ServiceResWithoutData response = await _teacherService.RemoveClasse(deleteClasseDto);
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
         }
 
     }
