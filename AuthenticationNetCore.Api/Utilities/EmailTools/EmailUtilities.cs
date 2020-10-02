@@ -1,5 +1,6 @@
 using System;
-using AuthenticationNetCore.Api.Data;
+using AuthenticationNetCore.Api.Models.Role;
+using AuthenticationNetCore.Api.Models.UserDto;
 using AuthenticationNetCore.Api.Utilities.TokenTools;
 using Microsoft.Extensions.Configuration;
 
@@ -15,8 +16,22 @@ namespace AuthenticationNetCore.Api.Utilities.EmailTools
         public static string GenerateEmailLink(IConfiguration config, User user, Guid emailCode)
         {
             var token = TokenUtilities.CreateAccountConfirmToken(config, user, emailCode);
-            var path = $"http://localhost:5000/User/Confirm?userid={user.Id}&code={token}";
-            return new Uri($"{path}").ToString();
+            var path = String.Empty;
+            switch (user.Role)
+            {   
+                case Role.Teacher:
+                    path = "AuthTeacher";
+                    break;
+                case Role.Student:
+                    path = "AuthStudent";
+                    break;
+                case Role.Admin:
+                    path = "AuthAdmin";
+                    break;
+                default:
+                    break;
+            }
+            return new Uri($"http://localhost:5000/{path}/Confirm?userid={user.Id}&code={token}").ToString();
         }
     }
 }

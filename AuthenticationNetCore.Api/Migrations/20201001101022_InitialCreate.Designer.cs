@@ -4,14 +4,16 @@ using AuthenticationNetCore.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AuthenticationNetCore.Api.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20201001101022_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,7 +30,7 @@ namespace AuthenticationNetCore.Api.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("TeacherId")
+                    b.Property<Guid>("TeacherId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -147,7 +149,9 @@ namespace AuthenticationNetCore.Api.Migrations
                 {
                     b.HasOne("AuthenticationNetCore.Api.Data.Teacher", "Teacher")
                         .WithMany("Classes")
-                        .HasForeignKey("TeacherId");
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("AuthenticationNetCore.Api.Data.StudentClasse", b =>

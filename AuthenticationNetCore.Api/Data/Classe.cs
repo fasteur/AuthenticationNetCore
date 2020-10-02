@@ -7,7 +7,7 @@ namespace AuthenticationNetCore.Api.Data
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public User Teacher { get; set; }
-        public List<UserClasse> Students { get; set; }
+        public Teacher Teacher { get; set; }
+        public List<StudentClasse> Students { get; set; }
     }
 }

@@ -1,7 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Net.Mail;
-using System.Text.Json.Serialization;
-
 namespace AuthenticationNetCore.Api.Models.UserDto
 {
     public class UserLoginDto
@@ -11,5 +8,8 @@ namespace AuthenticationNetCore.Api.Models.UserDto
 
         [Required]
         public string Password { get; set; }
+
+        [Required]
+        public string Role { get; set; }
     }
 }

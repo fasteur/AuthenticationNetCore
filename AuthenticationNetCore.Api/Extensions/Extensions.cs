@@ -1,5 +1,7 @@
 using System;
 using System.Security.Claims;
+using AuthenticationNetCore.Api.Data;
+
 namespace AuthenticationNetCore.Api
 {
     public static class Extensions

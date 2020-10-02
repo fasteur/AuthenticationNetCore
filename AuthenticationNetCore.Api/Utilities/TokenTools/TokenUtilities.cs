@@ -6,6 +6,7 @@ using System.Text;
 using AuthenticationNetCore.Api.Data;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
+using AuthenticationNetCore.Api.Models.UserDto;
 
 namespace AuthenticationNetCore.Api.Utilities.TokenTools
 {

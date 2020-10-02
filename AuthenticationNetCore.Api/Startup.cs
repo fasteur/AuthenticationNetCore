@@ -1,23 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using AuthenticationNetCore.Api.Data;
-using AuthenticationNetCore.Api.Repositories;
-using AuthenticationNetCore.Api.Services.AuthService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using AuthenticationNetCore.Api.Services.UserService;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
@@ -25,6 +17,16 @@ using AutoMapper;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using AuthenticationNetCore.Api.Services.EmailSenderService;
 using AuthenticationNetCore.Api.Models;
+using AuthenticationNetCore.Api.Services.Teachers.TeacherService;
+using AuthenticationNetCore.Api.Repositories.ClasseRepo;
+using AuthenticationNetCore.Api.Repositories.Teachers.TeacherRepo;
+using AuthenticationNetCore.Api.Repositories.Teachers.AuthTeacherRepo;
+using AuthenticationNetCore.Api.Repositories.Students.AuthStudentRepo;
+using AuthenticationNetCore.Api.Services.Teachers.AuthTeacherService;
+using AuthenticationNetCore.Api.Services.Students.AuthStudentService;
+using AuthenticationNetCore.Api.Repositories.Students.StudentRepo;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace AuthenticationNetCore.Api
 {
@@ -83,14 +85,26 @@ namespace AuthenticationNetCore.Api
                                     .Build();
             });
             services.AddControllers();
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddScoped<IAuthService, AuthService>();
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IAuthRepository, AuthRepository>();
-            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddMvc(option => option.EnableEndpointRouting = false)
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
+                .AddNewtonsoftJson(opt => opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
 
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            // Teachers
+            services.AddScoped<IAuthTeacherRepository, AuthTeacherRepository>();
+            services.AddScoped<IAuthTeacherService, AuthTeacherService>();
+            services.AddScoped<ITeacherRepository, TeacherRepository>();
+            services.AddScoped<ITeacherService, TeacherService>();
+            
+            // Students
+            services.AddScoped<IAuthStudentRepository, AuthStudentRepository>();
+            services.AddScoped<IStudentRepository, StudentRepository>();
+            services.AddScoped<IAuthStudentService, AuthStudentService>();
+
+            services.AddScoped<IClasseRepository, ClasseRepository>();
             services.AddTransient<IEmailSender, EmailSender>();
             services.Configure<AuthMessageSenderOptions>(Configuration);
+            // services.AddScoped<IUserService, UserService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
