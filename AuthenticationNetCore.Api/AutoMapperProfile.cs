@@ -33,17 +33,23 @@ namespace AuthenticationNetCore.Api
                 .ForMember(dto => dto.Classes, s => s.MapFrom(s => s.StudentClasses.Select(sc => sc.Classe)));
             // Classes
             CreateMap<Classe, GetClasseDto>()
-                .ForMember(dto => dto.Teacher, c => c.MapFrom(c => this.Mappers().Map<GetTeacherDto>(c.Teacher)))
-                .ForMember(dto => dto.Students, c => c.MapFrom(c => c.Students.Select(s => this.Mappers().Map<GetStudentDto>(s))));
+                .ForMember(dto => dto.Teacher, c => c.MapFrom(c => this.GetTeacherDtoMapper().Map<GetTeacherDto>(c.Teacher)))
+                .ForMember(dto => dto.Students, c => c.MapFrom(c => c.Students
+                    .Select(s => this.GetStudentWithoutClasseDtoMapper()
+                    .Map<GetStudentWithoutClasseDto>(s.Student))));
         }
-        
-        private IMapper Mappers()
+        private IMapper GetTeacherDtoMapper()
         {
             return new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<Student, GetStudentDto>()
-                    .ForMember(dto => dto.Classes, s => s.MapFrom(s => s.StudentClasses.Select(sc => sc.Classe)));
                 cfg.CreateMap<Teacher, GetTeacherDto>();
+            }).CreateMapper();
+        }
+        private IMapper GetStudentWithoutClasseDtoMapper()
+        {
+            return new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<Student, GetStudentWithoutClasseDto>();
             }).CreateMapper();
         }
 
@@ -52,10 +58,11 @@ namespace AuthenticationNetCore.Api
             return new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<Classe, GetClasseDto>()
-                    .ForMember(dto => dto.Teacher, c => c.MapFrom(c => this.Mappers().Map<GetTeacherDto>(c)))
-                    .ForMember(dto => dto.Students, c => c.MapFrom(c => c.Students.Select(s => this.Mappers().Map<GetStudentDto>(s))));
+                    .ForMember(dto => dto.Teacher, c => c.MapFrom(c => this.GetTeacherDtoMapper().Map<GetTeacherDto>(c.Teacher)))
+                    .ForMember(dto => dto.Students, c => c.MapFrom(c => c.Students
+                        .Select(s => this.GetStudentWithoutClasseDtoMapper()
+                        .Map<GetStudentWithoutClasseDto>(s.Student))));
             }).CreateMapper();
         }
-
     }
 }

@@ -88,6 +88,7 @@ namespace AuthenticationNetCore.Api
             services.AddMvc(option => option.EnableEndpointRouting = false)
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
                 .AddNewtonsoftJson(opt => opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
+                // todo: check jsonparsor
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             // Teachers

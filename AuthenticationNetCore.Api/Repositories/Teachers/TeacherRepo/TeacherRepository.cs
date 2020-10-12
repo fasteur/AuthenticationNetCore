@@ -21,6 +21,7 @@ namespace AuthenticationNetCore.Api.Repositories.Teachers.TeacherRepo
             return await context.Teachers
                 .Include(t => t.Classes)
                 .ThenInclude(c => c.Students)
+                .ThenInclude(s => s.Student)
                 .FirstOrDefaultAsync(u => u.Id == id && id == _httpContext.HttpContext.User.GetUserId());
         }
 

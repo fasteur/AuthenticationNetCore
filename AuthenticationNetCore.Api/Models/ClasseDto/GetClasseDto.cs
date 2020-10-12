@@ -10,6 +10,6 @@ namespace AuthenticationNetCore.Api.Models.ClasseDto
         public Guid Id { get; set; }
         public string Name { get; set; }
         public GetTeacherDto Teacher { get; set; }
-        public List<GetStudentDto> Students { get; set; }
+        public List<GetStudentWithoutClasseDto> Students { get; set; }
     }
 }
