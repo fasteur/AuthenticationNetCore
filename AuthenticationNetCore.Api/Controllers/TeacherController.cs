@@ -22,6 +22,12 @@ namespace AuthenticationNetCore.Api.Controllers
             _teacherService = teacherService;
         }
 
+        // --- POST ---
+        
+        /// <summary>
+        /// Create new student's class.
+        /// </summary>
+        /// <returns>Return list of the teacher's class</returns>
         [Authorize(Roles = "Teacher")]
         [HttpPost("Classes")]
         public async Task<ActionResult<List<GetClasseDto>>> CreateClasse(AddClasseDto newClasse)
@@ -29,13 +35,9 @@ namespace AuthenticationNetCore.Api.Controllers
             return Ok(await _teacherService.CreateClasse(newClasse));
         }
 
-        [Authorize(Roles = "Teacher")]
-        [HttpGet("Classes/{id}")]
-        public async Task<ActionResult<List<GetClasseDto>>> GetClasses(Guid id)
-        {
-            return Ok(await _teacherService.GetClasses(id));
-        }
-
+        /// <summary>
+        /// Add student to a class.
+        /// </summary>
         [Authorize(Roles = "Teacher")]
         [HttpPost("Student")]
         public async Task<IActionResult> AddStudent(AddStudentDto addStudentDto)
@@ -46,8 +48,23 @@ namespace AuthenticationNetCore.Api.Controllers
                 return BadRequest(response);
             }
             return Ok(response);
-
         }
+    
+        // --- GET ---
+
+        /// <summary>
+        /// Get teacher's classes.
+        /// </summary>
+        /// <param name="teacherId">Guid of the teacher</param>
+        /// <returns>Return list of the teacher's class</returns>
+        [Authorize(Roles = "Teacher")]
+        [HttpGet("Classes/{id}")]
+        public async Task<ActionResult<List<GetClasseDto>>> GetClasses(Guid teacherId)
+        {
+            return Ok(await _teacherService.GetClasses(teacherId));
+        }
+
+        // --- DELETE ---
 
         [Authorize(Roles = "Teacher")]
         [HttpDelete("Classes")]

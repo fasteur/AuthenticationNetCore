@@ -35,7 +35,6 @@ namespace AuthenticationNetCore.Api.Services.Teachers.TeacherService
             _mapper = mapper;
         }
 
-        // TODO: Créer une classe et checker si l'on sait ajouter un édutiant
         public async Task<ServiceResWithoutData> AddStudent(AddStudentDto studentsDto)
         {
             ServiceResWithoutData res = new ServiceResWithoutData();
